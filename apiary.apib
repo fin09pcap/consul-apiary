@@ -6,10 +6,20 @@ The API can be used for CRUD for nodes, services, checks, and configuration.
 The endpoints are versioned to enable changes without breaking backwards compatibility.
 
 # Group KV
-Notes related resources of the **Key/Value Store API**
 
-## KV Collection [/v1/kv/{key}{?wait,index,token,keys,recurse,separator,read_mode,pretty,raw,flags,cas,acquire,release}]
+The KV endpoint is used to expose a simple **key/value store**.
+This can be used to store service configurations or other meta data in a simple way.
+It has only a single endpoint: `/v1/kv/<key>`.
+
+By default the datacenter of the agent is queried, however the dc can be provided
+using the `dc` query parameter. If a client wants to write to all Datacenters,
+one request per datacenter must be made. The KV endpoint supports the use of ACL
+tokens.
+
+## KV Collection [/v1/kv/{key}{?dc,wait,index,token,keys,recurse,separator,read_mode,pretty,raw,flags,cas,acquire,release}]
+
 + Parameters
+    + dc (optional, string) ... datacenter
     + key (optional, path) ... the key
     + token (optional, string) ... per-request ACL token
 
