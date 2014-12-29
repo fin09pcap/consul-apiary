@@ -143,3 +143,321 @@ deleted, otherwise only the specified key.
     + recurse (optional) ... all keys with the prefix are deleted
 
 + Response 200
+
+# Group Agent control
+
+The Agent endpoints are used to interact with a local Consul agent.  Usually,
+services and checks are registered with an agent, which then takes on the burden
+of registering with the Catalog and performing anti-entropy to recover from
+outages.  There are also various control APIs that can be used instead of the
+msgpack RPC protocol.
+
+## Checks [/v1/agent/checks]
+
+### Return the checks the local agent is managing [GET]
+
+This endpoint is used to return the all the checks that are registered with the
+local agent.  These checks were either provided through configuration files, or
+added dynamically using the HTTP API.  It is important to note that the checks
+known by the agent may be different than those reported by the Catalog. This is
+usually due to changes being made while there is no leader elected.  The agent
+performs active anti-entropy, so in most situations everything will be in sync
+within a few seconds.
+
++ Response 200 (application/json)
+
+    + Body
+    
+            {
+                "service:redis": {
+                    "Node": "foobar",
+                    "CheckID": "service:redis",
+                    "Name": "Service 'redis' check",
+                    "Status": "passing",
+                    "Notes": "",
+                    "Output": "",
+                    "ServiceID": "redis",
+                    "ServiceName": "redis"
+                }
+            }
+
+## Services [/v1/agent/services]
+
+### Return the services local agent is managing [GET]
+
+This endpoint is used to return the all the services that are registered with
+the local agent.  These services were either provided through configuration
+files, or added dynamically using the HTTP API.  It is important to note that
+the services known by the agent may be different than those reported by the
+Catalog.  This is usually due to changes being made while there is no leader
+elected.  The agent performs active anti-entropy, so in most situations
+everything will be in sync within a few seconds.
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "redis": {
+                    "ID": "redis",
+                    "Service": "redis",
+                    "Tags": null,
+                    "Port": 8000
+                }
+            }
+
+
+## Members [/v1/agent/members{?wan}]
+
+### Return the members as seen by the local serf agent [GET]
+
+This endpoint returns the members the agent sees in the cluster gossip pool.
+Due to the nature of gossip, this is eventually consistent and the results may
+differ by agent.  The strongly consistent view of nodes is instead provided by
+`/v1/catalog/nodes` (@todo link).
+
+For agents running in server mode, providing `wan=1` returns the list of WAN
+members instead of the LAN members which is default.
+
++ Parameters
+    + wan (optional, num) ... `1` returns list of WAN instead of LAN members
+
++ Response 200 (application/json)
+
+    + Body
+
+            [
+                {
+                    "Name": "foobar",
+                    "Addr": "10.1.10.12",
+                    "Port": 8301,
+                    "Tags": {
+                        "bootstrap": "1",
+                        "dc": "dc1",
+                        "port": "8300",
+                        "role": "consul"
+                    },
+                    "Status": 1,
+                    "ProtocolMin": 1,
+                    "ProtocolMax": 2,
+                    "ProtocolCur": 2,
+                    "DelegateMin": 1,
+                    "DelegateMax": 3,
+                    "DelegateCur": 3
+                }
+            ]
+
+## Self [/v1/agent/self]
+
+### Return the local node configuration [GET]
+
+This endpoint is used to return configuration of the local agent and member information.
+
++ Response 200 (application/json)
+
+    + Body
+    
+            {
+                "Config": {
+                    "Bootstrap": true,
+                    "Server": true,
+                    "Datacenter": "dc1",
+                    "DataDir": "/tmp/consul",
+                    "DNSRecursor": "",
+                    "Domain": "consul.",
+                    "LogLevel": "INFO",
+                    "NodeName": "foobar",
+                    "ClientAddr": "127.0.0.1",
+                    "BindAddr": "0.0.0.0",
+                    "AdvertiseAddr": "10.1.10.12",
+                    "Ports": {
+                        "DNS": 8600,
+                        "HTTP": 8500,
+                        "RPC": 8400,
+                        "SerfLan": 8301,
+                        "SerfWan": 8302,
+                        "Server": 8300
+                    },
+                    "LeaveOnTerm": false,
+                    "SkipLeaveOnInt": false,
+                    "StatsiteAddr": "",
+                    "Protocol": 1,
+                    "EnableDebug": false,
+                    "VerifyIncoming": false,
+                    "VerifyOutgoing": false,
+                    "CAFile": "",
+                    "CertFile": "",
+                    "KeyFile": "",
+                    "StartJoin": [],
+                    "UiDir": "",
+                    "PidFile": "",
+                    "EnableSyslog": false,
+                    "RejoinAfterLeave": false
+                },
+                "Member": {
+                    "Name": "foobar",
+                    "Addr": "10.1.10.12",
+                    "Port": 8301,
+                    "Tags": {
+                        "bootstrap": "1",
+                        "dc": "dc1",
+                        "port": "8300",
+                        "role": "consul",
+                        "vsn": "1",
+                        "vsn_max": "1",
+                        "vsn_min": "1"
+                    },
+                    "Status": 1,
+                    "ProtocolMin": 1,
+                    "ProtocolMax": 2,
+                    "ProtocolCur": 2,
+                    "DelegateMin": 2,
+                    "DelegateMax": 4,
+                    "DelegateCur": 4
+                }
+            }
+
+## Join [/v1/agent/join/{address}{?wan}]
+
+### Trigger local agent to join a node [GET]
+
+This endpoint is used to instruct the agent to attempt to connect to a given
+address. For agents running in server mode, providing `wan=1` causes the agent
+to attempt to join using the WAN pool.
+
++ Parameters
+    + address (required, string) ... address of node to join
+    + wan (optional, num) ... `1` joins the WAN instead of the LAN pool
+
++ Response 200
+
+## Force Leave [/v1/agent/force-leave/{node}]
+
+### Force remove node [GET]
+
+This endpoint is used to instructs the agent to force a node into the left
+state.  If a node fails unexpectedly, then it will be in a "failed" state.  Once
+in this state, Consul will attempt to reconnect, and additionally the services
+and checks belonging to that node will not be cleaned up. Forcing a node into
+the left state allows its old entries to be removed.
+
++ Parameters
+    + node (required, string) ... the node to remove
+
++ Response 200
+
+## Register Check [/v1/agent/check/register]
+
+### Register a new local check [PUT]
+
+The register endpoint is used to add a new check to the local agent.  There is
+more documentation on checks
+[here](http://www.consul.io/docs/agent/checks.html). Checks are either a script
+or TTL type. The agent is responsible for managing the status of the check and
+keeping the Catalog in sync.
+
+The `Name` field is mandatory, as is either `Script` and `Interval` or `TTL`.
+Only one of `Script` and `Interval` or `TTL` should be provided. If an `ID` is
+not provided, it is set to `Name`. You cannot have duplicate `ID` entries per
+agent, so it may be necessary to provide an `ID`. The `Notes` field is not used
+by Consul, and is meant to be human readable.
+
+If a `Script` is provided, the check type is a script, and Consul will evaluate
+the script every `Interval` to update the status. If a `TTL` type is used, then
+the TTL update APIs must be used to periodically update the state of the check.
+
++ Request
+    
+        {
+            "ID": "mem",
+            "Name": "Memory utilization",
+            "Notes": "Ensure we don't oversubscribe memory",
+            "Script": "/usr/local/bin/check_mem.py",
+            "Interval": "10s",
+            "TTL": "15s"
+        }
+
++ Response 200
+
+## Deregister Check [/v1/agent/check/deregister/{checkID}]
+
+### Deregister a local check [GET]
+
+Remove a check from the local agent.  The agent will take care of deregistering
+the check with the Catalog.
+
++ Response 200
+
+## Set Check Status [/v1/agent/check/{state}/{checkID}{?note}]
+
+### Set status of local test [GET]
+
+This endpoint is used with [TTL
+type](http://www.consul.io/docs/agent/checks.html) checks. Sets the check status
+and resets the TTL clock.
+
+* state `pass` sets `checkID` to status `passing`
+* state `warn` sets `checkID` to status `warning`
+* state `fail` sets `checkID` to status `critical`
+
++ Parameters
+    + state (required, enum) ... the state of the check
+        + Values
+            + `pass`
+            + `warn`
+            + `fail`
+    + checkID (required, string) ... the ID of the check
+    + note (optional, string) ... check output
+    
+        Should be human-readable for operators
+
++ Response 200
+
+## Register Service [/v1/agent/service/register]
+
+### Registers a new local service [PUT]
+
+The register endpoint is used to add a new service to the local agent.  There is
+more documentation on services
+[here](http://www.consul.io/docs/agent/services.html). Services may also provide
+a health check. The agent is responsible for managing the status of the check
+and keeping the Catalog in sync.
+
+The `Name` field is mandatory.  If an `ID` is not provided, it is set to `Name`.
+You cannot have duplicate `ID` entries per agent, so it may be necessary to
+provide an `ID`. `Tags`, `Port` and `Check` are optional. If `Check` is
+provided, only one of `Script` and `Interval` or `TTL` should be provided. There
+is more information about checks
+[here](http://www.consul.io/docs/agent/checks.html).
+
+The created check will be named `service:<ServiceId>`.
+
+
++ Request
+
+        {
+            "ID": "redis1",
+            "Name": "redis",
+            "Tags": [ "master", "v1" ],
+            "Port": 8000,
+            "Check": {
+                "Script": "/usr/local/bin/check_redis.py",
+                "Interval": "10s",
+                "TTL": "15s"
+            }
+        }
+
++ Response 200
+
+## Deregister Service [/v1/agent/service/deregister/{serviceID}]
+
+### Deregister a local service [GET]
+
+Rremoves a service from the local agent. The agent will take care of
+deregistering the service with the Catalog. If there is an associated check,
+that is also deregistered.
+
++ Parameters
+    + serviceID (required, string) ... ID of service to deregister
+
++ Response 200
