@@ -1124,3 +1124,161 @@ This endpoint supports blocking queries and all consistency modes.
                 },
                 ...
             ]
+
+# Group ACL
+
+The ACL endpoints are used to create, update, destroy and query ACL tokens.
+
+In any Consul cluster, only a single datacenter is authoritative for ACLs, so
+all requests are automatically routed to that datacenter regardless of the agent
+that the request is made to.
+
+## Create [/v1/acl/create{?token}]
+
+### Creates a new token with policy [PUT]
+
+The create endpoint is used to make a new token. A token has a name, type, and a
+set of ACL rules. The name is opaque to Consul, and type is either "client" or
+"management". A management token is effectively like a root user, and has the
+ability to perform any action including creating, modifying, and deleting ACLs.
+A client token can only perform actions as permitted by the rules associated,
+and may never manage ACLs. This means the request to this endpoint must be made
+with a management token.
+
+None of the fields are mandatory, and in fact no body needs to be provided if
+the defaults are to be used. The `Name` and `Rules` default to being blank, and
+the `Type` defaults to "client". The format of `Rules` is [documented
+here](http://www.consul.io/docs/internals/acl.html).
+
+The response contains the ID of the newly-created ACL token.
+
++ Parameters
+    + token (required, string) ... ACL token
+
++ Request
+
+        {
+            "Name": "my-app-token",
+            "Type": "client",
+            "Rules": ""
+        }
+
++ Response 200 (application/json)
+    + Body
+    
+            {
+                "ID": "adf4238a-882b-9ddc-4a9d-5b6758e4159e"
+            }
+
+## Update [/v1/acl/update{?token}]
+
+### Update the policy of a token [PUT]
+
+The update endpoint is used to modify the policy for a given ACL token. It is
+very similar to the create endpoint, however instead of generating a new token
+ID, the ID field must be provided. Requests to this endpoint must be made with a
+management token.
+
+Only the `ID` field is mandatory, the other fields provide defaults. The `Name`
+and `Rules` default to being blank, and the `Type` defaults to "client". The
+format of Rules is The format of `Rules` is [documented
+here](http://www.consul.io/docs/internals/acl.html).
+
++ Parameters
+    + token (required, string) ... ACL token
+
++ Request
+
+        {
+            "ID": "adf4238a-882b-9ddc-4a9d-5b6758e4159e",
+            "Name": "my-app-token-updated",
+            "Type": "client",
+            "Rules": "# New Rules"
+        }
+
++ Response 200
+
+## Destroy [/v1/acl/destroy/{id}{?token}]
+
+### Destroys a given token [PUT]
+
+Destroys the given ACL token.  Requests to the endpoint must be made with a
+management token.
+
++ Parameters
+    + id (required, string) ... ACL token id to destroy
+    + token (required, string) ... ACL token
+
++ Response 200
+
+## Query [/v1/acl/info/{id}]
+
+### Queries the policy of a given token [GET]
+
+Returns the token information by ID.
+
+If the session is not found, `null` is returned instead of a JSON list.
+
++ Parameters
+    + id (required, string) ... ACL token id to retrieve
+
++ Response 200
+    + Body
+            
+            [
+                {
+                    "CreateIndex": 3,
+                    "ModifyIndex": 3,
+                    "ID": "8f246b77-f3e1-ff88-5b48-8ec93abf3e05",
+                    "Name": "Client Token",
+                    "Type": "client",
+                    "Rules": "..."
+                }
+            ]
+
+## Clone [/v1/acl/clone/{id}{?token}]
+
+### Creates a new token by cloning an existing token [GET]
+
+Returns a token ID that is cloned from an existing token. This allows a token to
+serve as a template for others, making it simple to generate new tokens without
+complex rule management.  Requests to this endpoint require a management token.
+
+The response contains the ID of the newly-created ACL token.
+
++ Parameters
+    + id (required, string) ... Source ACL token id
+    + token (required, string) ... ACL token
+
++ Response 200
+    + Body
+            
+            {
+                "ID": "adf4238a-882b-9ddc-4a9d-5b6758e4159e"
+            }
+
+## List [/v1/acl/list{?token}]
+
+### Lists all the active tokens [GET]
+
+Lists all the active ACL tokens. This is a privileged endpoint, and requires a
+management token.
+
++ Parameters
+    + token (required, string) ... ACL token
+
++ Response 200 (application/json)
+    + Body
+            
+            [
+                {
+                    "CreateIndex": 3,
+                    "ModifyIndex": 3,
+                    "ID": "8f246b77-f3e1-ff88-5b48-8ec93abf3e05",
+                    "Name": "Client Token",
+                    "Type": "client",
+                    "Rules": "..."
+                },
+                ...
+            ]
+
