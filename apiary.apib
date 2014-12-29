@@ -734,3 +734,179 @@ Supports blocking queries and all consistency modes.
                     }
                 }
             }
+
+# Group Health
+
+The Health endpoints are used to query health related information. It is
+provided separately from the Catalog, since users may prefer to not use the
+health checking mechanisms as they are totally optional. Additionally, some of
+the query results from the Health system are filtered, while the Catalog
+endpoints provide the raw entries.
+
+## Node [/v1/health/node/{node}{?dc,index,wait,read_mode}]
+
+### Returns the health info of a node [GET]
+
+Returns the node specific checks known.
+
+In the sample response body, we can see there is a system level check (no
+associated `ServiceID`, as well as a service check for Redis). The "serfHealth"
+check is special, in that all nodes automatically have this check. When a node
+joins the Consul cluster, it is part of a distributed failure detection provided
+by Serf. If a node fails, it is detected and the status is automatically changed
+to "critical".
+
++ Parameters
+    + node (required, string)
+    + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
+    + index (optional, handle)          ... initiates a blocking query
+    + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
+    + read_mode (optional, enum)        ... consistency mode
+        + Values
+            + `consistent`
+            + `stale`
+
++ Response 200 (application/json)
+    + Body
+
+            [
+                {
+                    "Node": "foobar",
+                    "CheckID": "serfHealth",
+                    "Name": "Serf Health Status",
+                    "Status": "passing",
+                    "Notes": "",
+                    "Output": "",
+                    "ServiceID": "",
+                    "ServiceName": ""
+                },
+                {
+                    "Node": "foobar",
+                    "CheckID": "service:redis",
+                    "Name": "Service 'redis' check",
+                    "Status": "passing",
+                    "Notes": "",
+                    "Output": "",
+                    "ServiceID": "redis",
+                    "ServiceName": "redis"
+                }
+            ]
+
+## Checks [/v1/health/checks/{service}{?dc,index,wait,read_mode}]
+
+### Returns the checks of a service [GET]
+
+Returns the checks associated with a service.
+
++ Parameters
+    + service (required, string)
+    + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
+    + index (optional, handle)          ... initiates a blocking query
+    + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
+    + read_mode (optional, enum)        ... consistency mode
+        + Values
+            + `consistent`
+            + `stale`
+
++ Response 200 (application/json)
+
+## Service [/v1/health/service/{service}{?dc,index,wait,read_mode,tag,passing}]
+
+### Returns the nodes and health info of a service [GET]
+
+Returns the service nodes providing a given service.
+
+By default all nodes in that service are returned.  However, the list can be
+filtered by tag using the `tag` query parameter.
+
+This is very similar to the `/v1/catalog/service endpoint`, however this
+endpoint automatically returns the status of the associated health check, as
+well as any system level health checks. This allows a client to avoid sending
+traffic to nodes failing health tests, or who are reporting warnings.
+
+Providing the `passing` query parameter will filter results to only nodes with
+all checks in the passing state. This can be used to avoid some filtering logic
+on the client side. (Added in Consul 0.2)
+
+Users can also built in support for dynamic load balancing and other features by
+incorporating the use of health checks.
+
++ Parameters
+    + service (required, string)
+    + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
+    + index (optional, handle)          ... initiates a blocking query
+    + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
+    + read_mode (optional, enum)        ... consistency mode
+        + Values
+            + `consistent`
+            + `stale`
+    + tag (optional, string)            ... tag to filter on
+    + passing (optional)                ... if provided, return only passing nodes
+
++ Response 200 (application/json)
+    + Body
+    
+            [
+                {
+                    "Node": {
+                        "Node": "foobar",
+                        "Address": "10.1.10.12"
+                    },
+                    "Service": {
+                        "ID": "redis",
+                        "Service": "redis",
+                        "Tags": null,
+                        "Port": 8000
+                    },
+                    "Checks": [
+                        {
+                            "Node": "foobar",
+                            "CheckID": "service:redis",
+                            "Name": "Service 'redis' check",
+                            "Status": "passing",
+                            "Notes": "",
+                            "Output": "",
+                            "ServiceID": "redis",
+                            "ServiceName": "redis"
+                        },
+                        {
+                            "Node": "foobar",
+                            "CheckID": "serfHealth",
+                            "Name": "Serf Health Status",
+                            "Status": "passing",
+                            "Notes": "",
+                            "Output": "",
+                            "ServiceID": "",
+                            "ServiceName": ""
+                        }
+                    ]
+                }
+            ]
+
+## State [/v1/health/state/{state}{?dc,index,wait,read_mode}]
+
+### Returns the checks in a given state [GET]
+
+Returns the checks in a specific state.
+
+The state being queried must be provided after the slash. The supported states
+are "any", "unknown", "passing", "warning", or "critical". The "any" state is a
+wildcard that can be used to return all the checks.
+
++ Parameters
+    + state (required, enum)
+        + Values
+            + `any`
+            + `unknown`
+            + `passing`
+            + `warning`
+            + `critical`
+    + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
+    + index (optional, handle)          ... initiates a blocking query
+    + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
+    + read_mode (optional, enum)        ... consistency mode
+        + Values
+            + `consistent`
+            + `stale`
+
++ Response 200 (application/json)
