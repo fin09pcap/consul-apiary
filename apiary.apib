@@ -6,7 +6,9 @@ The main interface to Consul is a RESTful HTTP API. The API can be used for CRUD
 for nodes, services, checks, and configuration. The endpoints are versioned to
 enable changes without breaking backwards compatibility.
 
-# Key/Value store [/v1/kv/{key}{?dc,wait,index,token,keys,recurse,separator,read_mode,pretty,raw,flags,cas,acquire,release}]
+# Group KV
+
+## Key/Value store [/v1/kv/{+key}{?dc,wait,index,token,keys,recurse,separator,read_mode,pretty,raw,flags,cas,acquire,release}]
 
 The KV endpoint is used to expose a simple **key/value store**.  This can be
 used to store service configurations or other meta data in a simple way.  It has
@@ -23,7 +25,7 @@ The KV endpoint supports the use of ACL tokens.
     + key (optional, path) ... the key
     + token (optional, string) ... per-request ACL token
 
-## Retrieve key [GET]
+### Retrieve key [GET]
 
 Retrieve the specified key, or if `recurse` is provided, return all keys with
 the given prefix.  If `keys` is provided, return a list of the keys under the
@@ -37,7 +39,7 @@ updated.
 
 This endpoint supports blocking queries and all consistency modes.
 
-### Response Payload
+#### Response Payload
 
 - `CreateIndex` - internal index value that represents when the entry was created
 - `ModifyIndex` - last index that modified this key; corresponds to the `X-Consul-Index` header value
@@ -48,8 +50,8 @@ This endpoint supports blocking queries and all consistency modes.
 - `Value`       - a base64 key value
 
 + Parameters
-    + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
     + index (optional, handle)          ... initiates a blocking query
+    + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
     + recurse (optional)                ... return all keys with the given prefix
     + keys (optional)                   ... return a list of the keys under the given prefix
     + separator (optional, string)      ... with `keys`, list only up to a given separator
@@ -59,6 +61,8 @@ This endpoint supports blocking queries and all consistency modes.
             + `consistent`
             + `stale`
     + pretty (optional) ... if provided, formatted JSON is returned
+
++ Request single-key
 
 + Response 200 (application/json)
     + Headers
@@ -83,14 +87,22 @@ This endpoint supports blocking queries and all consistency modes.
 
 + Response 404
 
-## Create or Update Key [PUT]
++ Request list-keys
+
++ Response 200 (application/json)
+
+    + Body
+    
+            @todo
+
+### Create or Update Key [PUT]
 
 The return value is simply either `true` or `false`.
 If `false` is returned, then the update has not taken place.
 
 Complex locking and synchronization operations are possbile.
 
-### Check-And-Set
+#### Check-And-Set
 
 Clients may build more complex synchronization primives using the Check-And-Set
 operation with the `cas` parameter.
@@ -99,7 +111,7 @@ If the `cas` value is `0`, Consul will only create the key if it does not alread
 If the `cas` value is non-zero, then the key is only updated if the index
 matches the `ModifyIndex` for the key.
 
-### Locking
+#### Locking
 
 Locking is a useful feature that allows leader election to be built on top of
 Consul.
@@ -132,7 +144,7 @@ unlocked.
 
         true
 
-## Delete a Key [DELETE]
+### Delete a Key [DELETE]
 
 Delete a single key or all keys sharing a prefix.
 
