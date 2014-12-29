@@ -1,61 +1,63 @@
 FORMAT: 1A
 
 # Consul HTTP API
-The main interface to Consul is a RESTful HTTP API.
-The API can be used for CRUD for nodes, services, checks, and configuration.
-The endpoints are versioned to enable changes without breaking backwards compatibility.
 
-# Group KV
+The main interface to Consul is a RESTful HTTP API. The API can be used for CRUD
+for nodes, services, checks, and configuration. The endpoints are versioned to
+enable changes without breaking backwards compatibility.
 
-The KV endpoint is used to expose a simple **key/value store**.
-This can be used to store service configurations or other meta data in a simple way.
-It has only a single endpoint: `/v1/kv/<key>`.
+# Key/Value store [/v1/kv/{key}{?dc,wait,index,token,keys,recurse,separator,read_mode,pretty,raw,flags,cas,acquire,release}]
 
-By default the datacenter of the agent is queried, however the dc can be provided
-using the `dc` query parameter. If a client wants to write to all Datacenters,
-one request per datacenter must be made. The KV endpoint supports the use of ACL
-tokens.
+The KV endpoint is used to expose a simple **key/value store**.  This can be
+used to store service configurations or other meta data in a simple way.  It has
+only a single endpoint: `/v1/kv/<key>`.
 
-## KV Collection [/v1/kv/{key}{?dc,wait,index,token,keys,recurse,separator,read_mode,pretty,raw,flags,cas,acquire,release}]
+By default the datacenter of the agent is queried, however the dc can be
+provided using the `dc` query parameter. If a client wants to write to all
+Datacenters, one request per datacenter must be made.
+
+The KV endpoint supports the use of ACL tokens.
 
 + Parameters
     + dc (optional, string) ... datacenter
     + key (optional, path) ... the key
     + token (optional, string) ... per-request ACL token
 
-### Retrieve key [GET]
+## Retrieve key [GET]
 
-Retrieve the specified key, or if `recurse` is provided, return all keys with the given prefix.
-If `keys` is provided, return a list of the keys under the given prefix; used with `separator`, list only up to a given separator.
+Retrieve the specified key, or if `recurse` is provided, return all keys with
+the given prefix.  If `keys` is provided, return a list of the keys under the
+given prefix; used with `separator`, list only up to a given separator.
 
 A blocking query can be used to wait for a value to change.
 
-If `recurse` is used, the `X-Consul-Index` corresponds to the latest `ModifyIndex` and so a blocking query waits until any of the listed keys are updated.
+If `recurse` is used, the `X-Consul-Index` corresponds to the latest
+`ModifyIndex` and so a blocking query waits until any of the listed keys are
+updated.
 
 This endpoint supports blocking queries and all consistency modes.
 
-#### Response Payload
+### Response Payload
+
 - `CreateIndex` - internal index value that represents when the entry was created
 - `ModifyIndex` - last index that modified this key; corresponds to the `X-Consul-Index` header value
-- `LockIndex` - last index of a successful lock acquisition
-- `Key` -  full path of the entry
-- `Flags` - opaque unsigned integer that can be attached to each entry; use of this is left totally to the user
-- `Session` - key provides the session that owns the lock
-- `Value` - a base64 key value
+- `LockIndex`   - last index of a successful lock acquisition
+- `Key`         - full path of the entry
+- `Flags`       - opaque unsigned integer that can be attached to each entry; use of this is left totally to the user
+- `Session`     - key provides the session that owns the lock
+- `Value`       - a base64 key value
 
 + Parameters
     + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
-    + index (optional, handle) ... initiates a blocking query
-    + recurse (optional) ... return all keys with the given prefix
-    + keys (optional) ... return a list of the keys under the given prefix
-    + separator (optional, string) ... with `keys`, list only up to a given separator
-    + raw (optional) ... with non-recursive get, response is raw value of key, without encoding
-    + read_mode (optional, enum) ... consistency mode
-    
+    + index (optional, handle)          ... initiates a blocking query
+    + recurse (optional)                ... return all keys with the given prefix
+    + keys (optional)                   ... return a list of the keys under the given prefix
+    + separator (optional, string)      ... with `keys`, list only up to a given separator
+    + raw (optional)                    ... with non-recursive get, response is raw value of key, without encoding
+    + read_mode (optional, enum)        ... consistency mode
         + Values
             + `consistent`
             + `stale`
-
     + pretty (optional) ... if provided, formatted JSON is returned
 
 + Response 200 (application/json)
@@ -81,29 +83,36 @@ This endpoint supports blocking queries and all consistency modes.
 
 + Response 404
 
-### Create or Update Key [PUT]
+## Create or Update Key [PUT]
 
 The return value is simply either `true` or `false`.
 If `false` is returned, then the update has not taken place.
 
 Complex locking and synchronization operations are possbile.
 
-#### Check-And-Set
+### Check-And-Set
 
-Clients may build more complex synchronization primives using the Check-And-Set operation
-with the `cas` parameter.
+Clients may build more complex synchronization primives using the Check-And-Set
+operation with the `cas` parameter.
 
 If the `cas` value is `0`, Consul will only create the key if it does not already exist.
-If the `cas` value is non-zero, then the key is only updated if the index matches the `ModifyIndex`
-for the key.
+If the `cas` value is non-zero, then the key is only updated if the index
+matches the `ModifyIndex` for the key.
 
-#### Locking
+### Locking
 
-This is useful as it allows leader election to be built on top of Consul. If the lock is not held and the session is valid, this increments the LockIndex and sets the Session value of the key in addition to updating the key contents. A key does not need to exist to be acquired.
-    
+Locking is a useful feature that allows leader election to be built on top of
+Consul.
 
-This is useful when paired with "?acquire=" as it allows clients to yield a lock. This will leave the LockIndex unmodified but will clear the associated Session of the key. The key must be held by this session to be unlocked.
+Acquire a lock by providing the `acquire` parameter with a valid session ID. If
+the lock is not held, this increments the `LockIndex` and sets the `Session`
+value of the key in addition to updating the key contents. A key does not need
+to exist to be acquired.
 
+Yield a lock by providing the `release` parameter with the ID of the session
+holding the lock.  This will leave the `LockIndex` unmodified but will clear the
+associated `Session` of the key. The key must be held by this session to be
+unlocked.
 
 + Parameters
     + flags (optional, num) ... an unsigned value between 0 and 2^64-1
@@ -123,9 +132,12 @@ This is useful when paired with "?acquire=" as it allows clients to yield a lock
 
         true
 
-### Delete a Key [DELETE]
+## Delete a Key [DELETE]
 
-Delete a single key or all keys sharing a prefix. If the "?recurse" query parameter is provided, then all keys with the prefix are deleted, otherwise only the specified key.
+Delete a single key or all keys sharing a prefix.
+
+If the `recurse` parameter is provided, then all keys with the prefix are
+deleted, otherwise only the specified key.
 
 + Parameters
     + recurse (optional) ... all keys with the prefix are deleted
