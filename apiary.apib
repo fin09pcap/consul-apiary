@@ -8,7 +8,7 @@ enable changes without breaking backwards compatibility.
 
 # Group KV
 
-## Key/Value store [/v1/kv/{+key}{?dc,wait,index,token,keys,recurse,separator,read_mode,pretty,raw,flags,cas,acquire,release}]
+## Key/Value store [/v1/kv/{+key}{?dc,wait,index,token,keys,recurse,separator,stale,consistent,pretty,raw,flags,cas,acquire,release}]
 
 The KV endpoint is used to expose a simple **key/value store**.  This can be
 used to store service configurations or other meta data in a simple way.  It has
@@ -56,10 +56,8 @@ This endpoint supports blocking queries and all consistency modes.
     + keys (optional)                   ... return a list of the keys under the given prefix
     + separator (optional, string)      ... with `keys`, list only up to a given separator
     + raw (optional)                    ... with non-recursive get, response is raw value of key, without encoding
-    + read_mode (optional, enum)        ... consistency mode
-        + Values
-            + `consistent`
-            + `stale`
+    + consistent (optional)             ... consistent read mode
+    + stale (optional)                  ... stale read mode
     + pretty (optional) ... if provided, formatted JSON is returned
 
 + Request single-key
@@ -595,7 +593,7 @@ Consul servers are routable.
 
             ["dc1", "dc2"]
 
-## Nodes [/v1/catalog/nodes{?dc,wait,index,read_mode}]
+## Nodes [/v1/catalog/nodes{?dc,wait,index,stale,consistent}]
 
 ### Lists nodes in a given DC [GET]
 
@@ -607,10 +605,8 @@ Supports blocking queries and all consistency modes.
     + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
     + index (optional, handle)          ... initiates a blocking query
     + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
-    + read_mode (optional, enum)        ... consistency mode
-        + Values
-            + `consistent`
-            + `stale`
+    + consistent (optional)             ... consistent read mode
+    + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
     + Body
@@ -626,7 +622,7 @@ Supports blocking queries and all consistency modes.
                 }
             ]
 
-## Services [/v1/catalog/services{?dc,wait,index,read_mode}]
+## Services [/v1/catalog/services{?dc,wait,index,stale,consistent}]
 
 ### Lists services in a given DC [GET]
 
@@ -641,10 +637,8 @@ Supports blocking queries and all consistency modes.
     + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
     + index (optional, handle)          ... initiates a blocking query
     + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
-    + read_mode (optional, enum)        ... consistency mode
-        + Values
-            + `consistent`
-            + `stale`
+    + consistent (optional)             ... consistent read mode
+    + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
     + Body
@@ -658,7 +652,7 @@ Supports blocking queries and all consistency modes.
                 ]
             }
 
-## Nodes for Service [/v1/catalog/service/<service>{?tag,dc,wait,index,read_mode}]
+## Nodes for Service [/v1/catalog/service/<service>{?tag,dc,wait,index,stale,consistent}]
 
 ### Lists the nodes in a given service [GET]
 
@@ -673,10 +667,8 @@ Supports blocking queries and all consistency modes.
     + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
     + index (optional, handle)          ... initiates a blocking query
     + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
-    + read_mode (optional, enum)        ... consistency mode
-        + Values
-            + `consistent`
-            + `stale`
+    + consistent (optional)             ... consistent read mode
+    + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
     + Body
@@ -692,7 +684,7 @@ Supports blocking queries and all consistency modes.
                 }
             ]
 
-## Services for Node [/v1/catalog/node/<node>{?dc,wait,index,read_mode}]
+## Services for Node [/v1/catalog/node/<node>{?dc,wait,index,stale,consistent}]
 
 ### Lists the services provided by a node [GET]
 
@@ -704,10 +696,8 @@ Supports blocking queries and all consistency modes.
     + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
     + index (optional, handle)          ... initiates a blocking query
     + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
-    + read_mode (optional, enum)        ... consistency mode
-        + Values
-            + `consistent`
-            + `stale`
+    + consistent (optional)             ... consistent read mode
+    + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
     + Body
@@ -743,7 +733,7 @@ health checking mechanisms as they are totally optional. Additionally, some of
 the query results from the Health system are filtered, while the Catalog
 endpoints provide the raw entries.
 
-## Node [/v1/health/node/{node}{?dc,index,wait,read_mode}]
+## Node [/v1/health/node/{node}{?dc,index,wait,stale,consistent}]
 
 ### Returns the health info of a node [GET]
 
@@ -761,10 +751,8 @@ to "critical".
     + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
     + index (optional, handle)          ... initiates a blocking query
     + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
-    + read_mode (optional, enum)        ... consistency mode
-        + Values
-            + `consistent`
-            + `stale`
+    + consistent (optional)             ... consistent read mode
+    + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
     + Body
@@ -792,7 +780,7 @@ to "critical".
                 }
             ]
 
-## Checks [/v1/health/checks/{service}{?dc,index,wait,read_mode}]
+## Checks [/v1/health/checks/{service}{?dc,index,wait,stale,consistent}]
 
 ### Returns the checks of a service [GET]
 
@@ -803,14 +791,12 @@ Returns the checks associated with a service.
     + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
     + index (optional, handle)          ... initiates a blocking query
     + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
-    + read_mode (optional, enum)        ... consistency mode
-        + Values
-            + `consistent`
-            + `stale`
+    + consistent (optional)             ... consistent read mode
+    + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
 
-## Service [/v1/health/service/{service}{?dc,index,wait,read_mode,tag,passing}]
+## Service [/v1/health/service/{service}{?dc,index,wait,stale,consistent,tag,passing}]
 
 ### Returns the nodes and health info of a service [GET]
 
@@ -836,10 +822,8 @@ incorporating the use of health checks.
     + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
     + index (optional, handle)          ... initiates a blocking query
     + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
-    + read_mode (optional, enum)        ... consistency mode
-        + Values
-            + `consistent`
-            + `stale`
+    + consistent (optional)             ... consistent read mode
+    + stale (optional)                  ... stale read mode
     + tag (optional, string)            ... tag to filter on
     + passing (optional)                ... if provided, return only passing nodes
 
@@ -883,7 +867,7 @@ incorporating the use of health checks.
                 }
             ]
 
-## State [/v1/health/state/{state}{?dc,index,wait,read_mode}]
+## State [/v1/health/state/{state}{?dc,index,wait,stale,consistent}]
 
 ### Returns the checks in a given state [GET]
 
@@ -904,10 +888,8 @@ wildcard that can be used to return all the checks.
     + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
     + index (optional, handle)          ... initiates a blocking query
     + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
-    + read_mode (optional, enum)        ... consistency mode
-        + Values
-            + `consistent`
-            + `stale`
+    + consistent (optional)             ... consistent read mode
+    + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
 
@@ -974,7 +956,7 @@ Destroys the given session.
 
 + Response 200
 
-## Info [/v1/session/info/{session}{?dc,index,wait,read_mode}]
+## Info [/v1/session/info/{session}{?dc,index,wait,stale,consistent}]
 
 ### Queries a given session [GET]
 
@@ -989,10 +971,8 @@ This endpoint supports blocking queries and all consistency modes.
     + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
     + index (optional, handle)          ... initiates a blocking query
     + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
-    + read_mode (optional, enum)        ... consistency mode
-        + Values
-            + `consistent`
-            + `stale`
+    + consistent (optional)             ... consistent read mode
+    + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
     + Body
@@ -1009,7 +989,7 @@ This endpoint supports blocking queries and all consistency modes.
                 }
             ]
 
-## Sessions for Node [/v1/session/node/{node}{?dc,index,wait,read_mode}]
+## Sessions for Node [/v1/session/node/{node}{?dc,index,wait,stale,consistent}]
 
 ### Lists sessions belonging to a node [GET]
 
@@ -1022,10 +1002,8 @@ This endpoint supports blocking queries and all consistency modes.
     + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
     + index (optional, handle)          ... initiates a blocking query
     + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
-    + read_mode (optional, enum)        ... consistency mode
-        + Values
-            + `consistent`
-            + `stale`
+    + consistent (optional)             ... consistent read mode
+    + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
     + Body
@@ -1043,7 +1021,7 @@ This endpoint supports blocking queries and all consistency modes.
                 ...
             ]
 
-## List [/v1/session/list{?dc,index,wait,read_mode}]
+## List [/v1/session/list{?dc,index,wait,stale,consistent}]
 
 ### Lists all the active sessions [GET]
 
@@ -1055,10 +1033,8 @@ This endpoint supports blocking queries and all consistency modes.
     + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
     + index (optional, handle)          ... initiates a blocking query
     + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
-    + read_mode (optional, enum)        ... consistency mode
-        + Values
-            + `consistent`
-            + `stale`
+    + consistent (optional)             ... consistent read mode
+    + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
     + Body
