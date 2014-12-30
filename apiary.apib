@@ -12,17 +12,16 @@ Certain endpoints support a feature called a "blocking query." A blocking query
 is used to wait for a change to potentially take place using long polling.
 
 Queries that support this will mention it specifically, however the use of this
-feature is the same for all. If supported, the query will set an HTTP header "X
--Consul-Index". This is an opaque handle that the client will use.
+feature is the same for all. If supported, the query will set an HTTP header `X
+-Consul-Index`. This is an opaque handle that the client will use.
 
-To cause a query to block, the query parameters
-"?wait=\<interval\>&index=\<idx\>" are added to a request. The "?wait=" query
-parameter limits how long the query will potentially block for. It not set, it
-will default to 10 minutes. It can be specified in the form of "10s" or "5m",
-which is 10 seconds or 5 minutes respectively. The "?index=" parameter is an
-opaque handle, which is used by Consul to detect changes. The "X-Consul-Index"
-header for a query provides this value, and can be used to wait for changes
-since the query was run.
+To cause a query to block, the query parameters `?wait=<interval>&index=<idx>`
+are added to a request. The `wait` query parameter limits how long the query
+will potentially block for. If not set, it will default to 10 minutes. It can be
+specified in the form of "10s" or "5m", which is 10 seconds or 5 minutes
+respectively. The `index` parameter is an opaque handle, which is used by Consul
+to detect changes. The `X-Consul-Index` header for a query provides this value,
+and can be used to wait for changes since the query was run.
 
 When provided, Consul blocks sending a response until there is an update that
 could have cause the output to change, and thus advancing the index. A critical
@@ -57,26 +56,26 @@ the leader. This means reads can be arbitrarily stale, but are generally within
 values will be stale. This mode allows reads without a leader, meaning a cluster
 that is unavailable will still be able to respond.
 
-To switch these modes, either the "?stale" or "?consistent" query parameters are
+To switch these modes, either the `stale` or `consistent` query parameters are
 provided. It is an error to provide both.
 
-To support bounding how stale data is, there is an "X-Consul-LastContact" which
+To support bounding how stale data is, there is an `X-Consul-LastContact` which
 is the last time a server was contacted by the leader node in milliseconds. The
-"X-Consul-KnownLeader" also indicates if there is a known leader. These can be
+`X-Consul-KnownLeader` also indicates if there is a known leader. These can be
 used to gauge if a stale read should be used.
 
 ## Formatted JSON Output
 
 By default, the output of all HTTP API requests return minimized JSON with all
-whitespace removed. By adding "?pretty" to the HTTP request URL, formatted JSON
-will be returned.
+whitespace removed. By passing the `pretty` query parameter, formatted JSON will
+be returned.
 
 ## ACLs
 
 Several endpoints in Consul use or require ACL tokens to operate. An agent can
 be configured to use a default token in requests using the `acl_token`
 configuration option. However, the token can also be specified per-request by
-using the "?token=" query parameter. This will take precedence over the default
+using the `token` query parameter. This will take precedence over the default
 token.
 
 # Group KV
@@ -131,7 +130,7 @@ This endpoint supports blocking queries and all consistency modes.
     + raw (optional)                    ... with non-recursive get, response is raw value of key, without encoding
     + consistent (optional)             ... consistent read mode
     + stale (optional)                  ... stale read mode
-    + pretty (optional) ... if provided, formatted JSON is returned
+    + pretty (optional)                 ... if provided, formatted JSON is returned
 
 + Request single-key
 
