@@ -1374,3 +1374,33 @@ the future. The buffer should be large enough for most clients and watches.
                 ...
             ]
 
+# Group Status
+
+The Status endpoints are used to get information about the status of the Consul
+cluster. These are generally very low level, and not really useful for clients.
+
+## Leader [/v1/status/leader]
+
+### Returns the current Raft leader [GET]
+
+Returns the Raft leader for the datacenter the agent is running in.
+
++ Response 200 (application/json)
+    + Body
+    
+            "10.1.10.12:8300"
+
+## Peers [/v1/status/peers]
+
+### Returns the current Raft peer set [GET]
+
+Returns the Raft peers for the datacenter the agent is running in.
+
++ Response 200 (application/json)
+    + Body
+
+            [
+                "10.1.10.12:8300",
+                "10.1.10.11:8300",
+                "10.1.10.10:8300"
+            ]
