@@ -84,7 +84,7 @@ token.
 
 The KV endpoint is used to expose a simple **key/value store**.  This can be
 used to store service configurations or other meta data in a simple way.  It has
-only a single endpoint: `/v1/kv/<key>`.
+only a single endpoint: `/v1/kv/{key}`.
 
 By default the datacenter of the agent is queried, however the dc can be
 provided using the `dc` query parameter. If a client wants to write to all
@@ -731,7 +731,7 @@ Supports blocking queries and all consistency modes.
                 ]
             }
 
-## Nodes for Service [/v1/catalog/service/<service>{?tag,dc,wait,index,stale,consistent}]
+## Nodes for Service [/v1/catalog/service/{service}{?tag,dc,wait,index,stale,consistent}]
 
 ### Lists the nodes in a given service [GET]
 
@@ -742,6 +742,7 @@ using the `tag` query parameter.
 Supports blocking queries and all consistency modes.
 
 + Parameters
+    + service (string)                  ... service to retrieve
     + tag (optional, string)            ... tag to filter on
     + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
     + index (optional, handle)          ... initiates a blocking query
@@ -769,7 +770,7 @@ Supports blocking queries and all consistency modes.
                 }
             ]
 
-## Services for Node [/v1/catalog/node/<node>{?dc,wait,index,stale,consistent}]
+## Services for Node [/v1/catalog/node/{node}{?dc,wait,index,stale,consistent}]
 
 ### Lists the services provided by a node [GET]
 
@@ -778,6 +779,7 @@ Returns the node-provided services.
 Supports blocking queries and all consistency modes.
 
 + Parameters
+    + node (string)                     ... node to retrieve
     + dc (optional, string)             ... datacenter to query; defaults to agent's datacenter
     + index (optional, handle)          ... initiates a blocking query
     + wait = `10m` (optional, interval) ... limits how long query will potentially block for; use with `index`
