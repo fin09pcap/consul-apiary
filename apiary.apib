@@ -433,10 +433,9 @@ the left state allows its old entries to be removed.
 ### Register a new local check [PUT]
 
 The register endpoint is used to add a new check to the local agent.  There is
-more documentation on checks
-[here](http://www.consul.io/docs/agent/checks.html). Checks are either a script
-or TTL type. The agent is responsible for managing the status of the check and
-keeping the Catalog in sync.
+more documentation on checks [here](/docs/agent/checks.html). Checks are either
+a script or TTL type. The agent is responsible for managing the status of the
+check and keeping the Catalog in sync.
 
 The `Name` field is mandatory, as is either `Script` and `Interval` or `TTL`.
 Only one of `Script` and `Interval` or `TTL` should be provided. If an `ID` is
@@ -474,9 +473,8 @@ the check with the Catalog.
 
 ### Set status of local test [GET]
 
-This endpoint is used with [TTL
-type](http://www.consul.io/docs/agent/checks.html) checks. Sets the check status
-and resets the TTL clock.
+This endpoint is used with [TTL type](/docs/agent/checks.html) checks. Sets the
+check status and resets the TTL clock.
 
 * state `pass` sets `checkID` to status `passing`
 * state `warn` sets `checkID` to status `warning`
@@ -500,17 +498,15 @@ and resets the TTL clock.
 ### Registers a new local service [PUT]
 
 The register endpoint is used to add a new service to the local agent.  There is
-more documentation on services
-[here](http://www.consul.io/docs/agent/services.html). Services may also provide
-a health check. The agent is responsible for managing the status of the check
-and keeping the Catalog in sync.
+more documentation on services [here](/docs/agent/services.html). Services may
+also provide a health check. The agent is responsible for managing the status of
+the check and keeping the Catalog in sync.
 
 The `Name` field is mandatory.  If an `ID` is not provided, it is set to `Name`.
 You cannot have duplicate `ID` entries per agent, so it may be necessary to
 provide an `ID`. `Tags`, `Port` and `Check` are optional. If `Check` is
 provided, only one of `Script` and `Interval` or `TTL` should be provided. There
-is more information about checks
-[here](http://www.consul.io/docs/agent/checks.html).
+is more information about checks [here](/docs/agent/checks.html).
 
 The created check will be named `service:<ServiceId>`.
 
@@ -974,10 +970,9 @@ The Session endpoints are used to create, destroy and query sessions.
 ### Creates a new session [PUT]
 
 Initialize a new session. There is more documentation on sessions
-[here](http://www.consul.io/docs/internals/sessions.html).  Sessions must be
-associated with a node, and optionally any number of checks. By default, the
-agent uses its own node name, and provides the "serfHealth" check, along with a
-15 second lock delay.
+[here](/docs/internals/sessions.html).  Sessions must be associated with a node,
+and optionally any number of checks. By default, the agent uses its own node
+name, and provides the "serfHealth" check, along with a 15 second lock delay.
 
 By default, the agent's local datacenter is used, but another datacenter can be
 specified using the `dc` query parameter. It is not recommended to use cross-
@@ -1147,7 +1142,7 @@ with a management token.
 None of the fields are mandatory, and in fact no body needs to be provided if
 the defaults are to be used. The `Name` and `Rules` default to being blank, and
 the `Type` defaults to "client". The format of `Rules` is [documented
-here](http://www.consul.io/docs/internals/acl.html).
+here](/docs/internals/acl.html).
 
 The response contains the ID of the newly-created ACL token.
 
@@ -1181,7 +1176,7 @@ management token.
 Only the `ID` field is mandatory, the other fields provide defaults. The `Name`
 and `Rules` default to being blank, and the `Type` defaults to "client". The
 format of Rules is The format of `Rules` is [documented
-here](http://www.consul.io/docs/internals/acl.html).
+here](/docs/internals/acl.html).
 
 + Parameters
     + token (required, string) ... ACL token
