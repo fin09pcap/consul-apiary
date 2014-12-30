@@ -160,10 +160,18 @@ This endpoint supports blocking queries and all consistency modes.
 + Request list-keys
 
 + Response 200 (application/json)
+    + Headers
+    
+            X-Consul-Index: 20116918
+            X-Consul-Knownleader: true
+            X-Consul-Lastcontact: 0
 
     + Body
     
-            @todo
+            [
+                "some/key",
+                "some/other/key"
+            ]
 
 ### Create or Update Key [PUT]
 
@@ -211,8 +219,9 @@ unlocked.
         value of key
 
 + Response 200 (application/json)
-
-        true
+        + Body
+        
+                true
 
 ### Delete a Key [DELETE]
 
@@ -247,7 +256,6 @@ performs active anti-entropy, so in most situations everything will be in sync
 within a few seconds.
 
 + Response 200 (application/json)
-
     + Body
     
             {
@@ -276,7 +284,6 @@ elected.  The agent performs active anti-entropy, so in most situations
 everything will be in sync within a few seconds.
 
 + Response 200 (application/json)
-
     + Body
 
             {
@@ -305,7 +312,6 @@ members instead of the LAN members which is default.
     + wan (optional, num) ... `1` returns list of WAN instead of LAN members
 
 + Response 200 (application/json)
-
     + Body
 
             [
@@ -336,7 +342,6 @@ members instead of the LAN members which is default.
 This endpoint is used to return configuration of the local agent and member information.
 
 + Response 200 (application/json)
-
     + Body
     
             {
@@ -606,7 +611,6 @@ and visa-versa. They can be provided or omitted at will.
         }
 
 + Response 200
-
 
 ## Deregister [/v1/catalog/deregister]
 
