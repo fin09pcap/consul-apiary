@@ -656,7 +656,6 @@ during an availability outage. It can thus be a simple check to see if any
 Consul servers are routable.
 
 + Response 200 (application/json)
-
     + Body
 
             ["dc1", "dc2"]
@@ -677,6 +676,12 @@ Supports blocking queries and all consistency modes.
     + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
+    + Headers
+    
+            X-Consul-Index: 20116425
+            X-Consul-Knownleader: true
+            X-Consul-Lastcontact: 0
+
     + Body
     
             [
@@ -709,6 +714,12 @@ Supports blocking queries and all consistency modes.
     + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
+    + Headers
+    
+            X-Consul-Index: 20116205
+            X-Consul-Knownleader: true
+            X-Consul-Lastcontact: 0
+
     + Body
     
             {
@@ -739,6 +750,12 @@ Supports blocking queries and all consistency modes.
     + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
+    + Headers
+    
+            X-Consul-Index: 20116444
+            X-Consul-Knownleader: true
+            X-Consul-Lastcontact: 0
+
     + Body
 
             [
@@ -768,6 +785,12 @@ Supports blocking queries and all consistency modes.
     + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
+    + Headers
+        
+            X-Consul-Index: 20116455
+            X-Consul-Knownleader: true
+            X-Consul-Lastcontact: 0
+
     + Body
 
             {
@@ -823,6 +846,12 @@ to "critical".
     + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
+    + Headers
+    
+            X-Consul-Index: 20116461
+            X-Consul-Knownleader: true
+            X-Consul-Lastcontact: 0
+
     + Body
 
             [
@@ -863,6 +892,26 @@ Returns the checks associated with a service.
     + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
+    + Headers
+        
+            X-Consul-Index: 20116464
+            X-Consul-Knownleader: true
+            X-Consul-Lastcontact: 0
+
+    + Body
+    
+            [
+                {
+                    "Node": "foobar",
+                    "CheckID": "service:redis",
+                    "Name": "Service 'redis' check",
+                    "Status": "passing",
+                    "Notes": "",
+                    "Output": "",
+                    "ServiceID": "redis",
+                    "ServiceName": "redis"
+                }
+            ]
 
 ## Service [/v1/health/service/{service}{?dc,index,wait,stale,consistent,tag,passing}]
 
@@ -896,6 +945,12 @@ incorporating the use of health checks.
     + passing (optional)                ... if provided, return only passing nodes
 
 + Response 200 (application/json)
+    + Headers
+    
+            X-Consul-Index: 20116478
+            X-Consul-Knownleader: true
+            X-Consul-Lastcontact: 0
+
     + Body
     
             [
@@ -960,6 +1015,36 @@ wildcard that can be used to return all the checks.
     + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
+    + Headers
+        
+            X-Consul-Index: 20116483
+            X-Consul-Knownleader: true
+            X-Consul-Lastcontact: 0
+
+    + Body
+    
+            [
+                {
+                    "Node": "foobar",
+                    "CheckID": "serfHealth",
+                    "Name": "Serf Health Status",
+                    "Status": "passing",
+                    "Notes": "",
+                    "Output": "",
+                    "ServiceID": "",
+                    "ServiceName": ""
+                },
+                {
+                    "Node": "foobar",
+                    "CheckID": "service:redis",
+                    "Name": "Service 'redis' check",
+                    "Status": "passing",
+                    "Notes": "",
+                    "Output": "",
+                    "ServiceID": "redis",
+                    "ServiceName": "redis"
+                }
+            ]
 
 # Group Session
 
@@ -1021,7 +1106,10 @@ Destroys the given session.
     + session (required, string) ... session ID to destroy
     + dc (optional, string)      ... datacenter to query; defaults to agent's datacenter
 
-+ Response 200
++ Response 200 (application/json)
+    + Body
+
+            true
 
 ## Info [/v1/session/info/{session}{?dc,index,wait,stale,consistent}]
 
@@ -1042,6 +1130,12 @@ This endpoint supports blocking queries and all consistency modes.
     + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
+    + Headers
+    
+            X-Consul-Index: 20116517
+            X-Consul-Knownleader: true
+            X-Consul-Lastcontact: 0
+
     + Body
 
             [
@@ -1073,6 +1167,12 @@ This endpoint supports blocking queries and all consistency modes.
     + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
+    + Headers
+    
+            X-Consul-Index: 20116517
+            X-Consul-Knownleader: true
+            X-Consul-Lastcontact: 0
+
     + Body
 
             [
@@ -1104,6 +1204,12 @@ This endpoint supports blocking queries and all consistency modes.
     + stale (optional)                  ... stale read mode
 
 + Response 200 (application/json)
+    + Headers
+        
+            X-Consul-Index: 20116517
+            X-Consul-Knownleader: true
+            X-Consul-Lastcontact: 0
+
     + Body
 
             [
@@ -1163,6 +1269,11 @@ The response contains the ID of the newly-created ACL token.
             {
                 "ID": "adf4238a-882b-9ddc-4a9d-5b6758e4159e"
             }
+
++ Response 401 (text/plain)
+    + Body
+
+            ACL support disabled
 
 ## Update [/v1/acl/update{?token}]
 
@@ -1306,16 +1417,16 @@ The response contains the ID of the newly-fired event.
 + Response 200 (application/json)
     + Body
         
-        {
-            "ID": "b54fe110-7af5-cafc-d1fb-afc8ba432b1c",
-            "Name": "deploy",
-            "Payload": null,
-            "NodeFilter": "",
-            "ServiceFilter": "",
-            "TagFilter": "",
-            "Version": 1,
-            "LTime": 0
-        }
+            {
+                "ID": "b54fe110-7af5-cafc-d1fb-afc8ba432b1c",
+                "Name": "deploy",
+                "Payload": null,
+                "NodeFilter": "",
+                "ServiceFilter": "",
+                "TagFilter": "",
+                "Version": 1,
+                "LTime": 0
+            }
 
 ## List [/v1/event/list{?name}]
 
@@ -1356,7 +1467,7 @@ the future. The buffer should be large enough for most clients and watches.
 + Response 200 (application/json)
     + Headers
     
-        X-Consul-Index: 1
+            X-Consul-Index: 1
 
     + Body
 
@@ -1381,7 +1492,7 @@ cluster. These are generally very low level, and not really useful for clients.
 
 ## Leader [/v1/status/leader]
 
-### Returns the current Raft leader [GET]
+### Retrieve Raft leader [GET]
 
 Returns the Raft leader for the datacenter the agent is running in.
 
@@ -1392,7 +1503,7 @@ Returns the Raft leader for the datacenter the agent is running in.
 
 ## Peers [/v1/status/peers]
 
-### Returns the current Raft peer set [GET]
+### Returns Raft peer set [GET]
 
 Returns the Raft peers for the datacenter the agent is running in.
 
