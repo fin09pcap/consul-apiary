@@ -78,7 +78,7 @@ configuration option. However, the token can also be specified per-request by
 using the `token` query parameter. This will take precedence over the default
 token.
 
-# Group KV
+# Group Consul HTTP /v1/kv - Key/Value
 
 ## Key/Value store [/v1/kv/{+key}{?dc,wait,index,token,keys,recurse,separator,stale,consistent,pretty,raw,flags,cas,acquire,release}]
 
@@ -235,7 +235,7 @@ deleted, otherwise only the specified key.
 
 + Response 200
 
-# Group Agent control
+# Group Consul HTTP /v1/agent - Agent Control
 
 The Agent endpoints are used to interact with a local Consul agent.  Usually,
 services and checks are registered with an agent, which then takes on the burden
@@ -545,7 +545,7 @@ that is also deregistered.
 
 + Response 200
 
-# Group Catalog
+# Group Consul HTTP /v1/catalog - Datacenter Catalog
 
 The Catalog is the endpoint used to register and deregister nodes, services, and
 checks. It also provides a number of query endpoints.
@@ -822,7 +822,7 @@ Supports blocking queries and all consistency modes.
                 }
             }
 
-# Group Health
+# Group Consul HTTP /v1/health - Health
 
 The Health endpoints are used to query health related information. It is
 provided separately from the Catalog, since users may prefer to not use the
@@ -1052,7 +1052,7 @@ wildcard that can be used to return all the checks.
                 }
             ]
 
-# Group Session
+# Group Consul HTTP /v1/session - Session
 
 The Session endpoints are used to create, destroy and query sessions.
 
@@ -1231,7 +1231,7 @@ This endpoint supports blocking queries and all consistency modes.
                 ...
             ]
 
-# Group ACL
+# Group CONSUL HTTP /v1/acl - ACL
 
 The ACL endpoints are used to create, update, destroy and query ACL tokens.
 
@@ -1393,7 +1393,7 @@ management token.
                 ...
             ]
 
-# Group Events
+# Group Consul HTTP /v1/event - Events
 
 The Event endpoints are used to fire new events and to query the available
 events.
@@ -1491,7 +1491,7 @@ the future. The buffer should be large enough for most clients and watches.
                 ...
             ]
 
-# Group Status
+# Group Consul /v1/status - Status
 
 The Status endpoints are used to get information about the status of the Consul
 cluster. These are generally very low level, and not really useful for clients.
@@ -1522,6 +1522,6 @@ Returns the Raft peers for the datacenter the agent is running in.
                 "10.1.10.10:8300"
             ]
 
-# Group Internal
+# Group Consul HTTP Internal
 
 Internal APIs. Purposely undocumented, subject to change.
